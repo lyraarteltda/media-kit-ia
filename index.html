@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script>/* gate-bootstrap (inline — CSP permite 'unsafe-inline' na frota):
+     (1) captura um envio precoce do login antes do gate remoto montar, para o 1º clique nunca se perder;
+     (2) COR-062: se já houver sessão salva, marca <html> como "conferindo acesso" para o membro
+         que volta NÃO ver o formulário de login piscar; um MutationObserver tira a marca assim que
+         o gate troca de tela (concedido OU negado), com timeout de 8s. O backend continua decidindo. */
+  (function(){
+    function h(e){var f=e.target;if(f&&f.id==='gate-form'&&!window.MembershipGate){e.preventDefault();e.stopImmediatePropagation();window.__gateEarlySubmit=true;}}
+    window.addEventListener('submit',h,true);
+    window.__gateBootstrapDisarm=function(){window.removeEventListener('submit',h,true);};
+    try{
+      if(localStorage.getItem('maestria_member_session')){
+        var de=document.documentElement; de.className+=' is-gate-checking';
+        var clear=function(){de.className=de.className.replace(/\s*is-gate-checking/g,'');};
+        var obs=new MutationObserver(function(muts){
+          for(var i=0;i<muts.length;i++){var t=muts[i].target;
+            if(t&&t.classList&&t.classList.contains('screen')){clear();obs.disconnect();return;}}
+        });
+        document.addEventListener('DOMContentLoaded',function(){
+          var scr=document.querySelectorAll('.screen');
+          for(var i=0;i<scr.length;i++)obs.observe(scr[i],{attributes:true,attributeFilter:['class']});
+        });
+        setTimeout(clear,8000);
+      }
+    }catch(_){}
+  })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mídia Kit IA — Maestros da IA</title>
+  <meta name="description" content="Monte o mídia kit do criador para fechar publis e parcerias com marcas — pronto para baixar.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://gate.maestrosdaia.com">
+  <link rel="preload" href="https://gate.maestrosdaia.com/v1/membership-gate.js" as="script">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2316140f'/%3E%3Crect x='6' y='5' width='20' height='22' rx='2' fill='%23f4f1ea'/%3E%3Crect x='9' y='8' width='14' height='3' rx='1' fill='%23e11d6b'/%3E%3Crect x='9' y='14' width='14' height='1.6' fill='%2316140f'/%3E%3Crect x='9' y='17.5' width='14' height='1.6' fill='%2316140f'/%3E%3Crect x='9' y='21' width='9' height='1.6' fill='%2316140f'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <!-- ===================== MEMBERSHIP GATE ===================== -->
+  <div id="gate-screen" class="screen active">
+    <div class="gate-wrap">
+      <div class="gate-card">
+        <div class="masthead-mini">
+          <span class="mh-kicker">MAESTROS DA IA</span>
+          <span class="mh-issue">EDIÇÃO 2026 · Nº 01</span>
+        </div>
+        <div class="cover-rule"></div>
+        <p class="gate-checking-note">Conferindo o seu acesso…</p>
+        <div class="gate-body">
+          <h1 class="cover-title">MÍDIA<br>KIT IA</h1>
+          <p class="subtitle">Monte o mídia kit do criador para fechar publis e parcerias com marcas — pronto para baixar.</p>
+          <p class="community-badge">Exclusivo para membros da Comunidade Maestros da IA</p>
+
+          <form id="gate-form" class="gate-form">
+            <div class="form-group">
+              <label for="gate-email">Seu e-mail cadastrado</label>
+              <input type="email" id="gate-email" placeholder="seu@email.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label for="gate-phone">Seu WhatsApp (com DDD)</label>
+              <input type="tel" id="gate-phone" placeholder="11999999999" autocomplete="tel">
+            </div>
+            <button type="submit" id="gate-submit" class="btn-primary">
+              <span class="btn-text">Entrar na redação</span>
+              <span class="btn-loading">Verificando…</span>
+            </button>
+            <p id="gate-error" class="error-message"></p>
+          </form>
+
+          <p class="gate-footer">Ainda não é membro? <a href="https://comunidade.maestrosdaia.com" target="_blank" rel="noopener noreferrer">Conheça a Comunidade Maestros da IA</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== API KEY SETUP ===================== -->
+  <div id="key-screen" class="screen">
+    <div class="key-wrap">
+      <div class="key-card">
+        <span class="section-kicker">CREDENCIAL DE IMPRENSA</span>
+        <h2>Conecte sua chave de IA</h2>
+        <p class="subtitle">Sua chave fica salva só no seu navegador. Nunca é enviada para os nossos servidores. Use a sua própria chave da <strong>OpenRouter</strong> — com ela você alcança Claude, GPT, Gemini, DeepSeek e mais.</p>
+
+        <div id="key-inputs" class="key-inputs"></div>
+
+        <div class="form-group">
+          <label for="key-model-select">Modelo de IA para escrever os textos</label>
+          <select id="key-model-select" class="select"></select>
+        </div>
+
+        <div class="key-actions">
+          <button id="key-continue" class="btn-primary" disabled>Abrir o estúdio</button>
+          <button id="key-skip" class="btn-ghost">Pular por enquanto</button>
+        </div>
+
+        <details class="key-info">
+          <summary>Como consigo uma chave da OpenRouter?</summary>
+          <div class="key-info-content">
+            <p>Crie uma conta em <code>openrouter.ai</code>, adicione créditos e gere uma chave em <code>openrouter.ai/keys</code> (começa com <code>sk-or-...</code>). Uma única chave acessa todos os modelos do seletor.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN APP ===================== -->
+  <div id="app-screen" class="screen">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-logo" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="6" y="5" width="20" height="22" rx="2" fill="currentColor"/><rect x="9" y="8" width="14" height="3" rx="1" fill="var(--accent)"/><rect x="9" y="14" width="14" height="1.6" fill="#f4f1ea"/><rect x="9" y="17.5" width="14" height="1.6" fill="#f4f1ea"/><rect x="9" y="21" width="9" height="1.6" fill="#f4f1ea"/></svg>
+        </span>
+        <div class="header-titles">
+          <h1 class="app-title">Mídia Kit IA</h1>
+          <span class="app-sub">Maestros da IA</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="about.html" class="btn-icon" title="Sobre esta ferramenta" aria-label="Sobre">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </a>
+        <button id="manage-keys-btn" class="btn-icon" title="Gerenciar chave de IA" aria-label="Gerenciar chave">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </button>
+        <button id="logout-btn" class="btn-icon" title="Sair" aria-label="Sair">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="studio">
+      <!-- BRIEFING RAIL -->
+      <section class="brief" aria-label="Pauta do mídia kit">
+        <div class="brief-scroll">
+          <p class="brief-lead"><span class="dot"></span>Preencha a pauta. A IA escreve os textos; os seus números entram exatamente como você digitar.</p>
+
+          <!-- Identidade -->
+          <fieldset class="bsec">
+            <legend><span class="num">01</span> Identidade</legend>
+            <div class="form-group"><label for="f-nome">Seu nome</label><input id="f-nome" type="text" placeholder="Ex.: Marina Alves"></div>
+            <div class="form-group"><label for="f-handle">@ principal</label><input id="f-handle" type="text" placeholder="@marina.cria"></div>
+            <div class="grid2">
+              <div class="form-group"><label for="f-nicho">Nicho</label><input id="f-nicho" type="text" placeholder="Ex.: Moda e lifestyle"></div>
+              <div class="form-group"><label for="f-local">Cidade / UF</label><input id="f-local" type="text" placeholder="São Paulo, SP"></div>
+            </div>
+            <div class="form-group"><label for="f-tagline">Frase de capa (opcional)</label><input id="f-tagline" type="text" placeholder="Deixe em branco e a IA cria"></div>
+            <div class="grid2">
+              <div class="form-group">
+                <label for="f-cor">Cor da marca</label>
+                <div class="color-row"><input id="f-cor" type="color" value="#d81b60"><span class="color-hex" id="f-cor-hex">#D81B60</span></div>
+              </div>
+              <div class="form-group">
+                <label for="f-logo">Foto / logo (opcional)</label>
+                <input id="f-logo" type="file" accept="image/png,image/jpeg,image/webp" class="file-input">
+                <div id="logo-preview" class="logo-preview" hidden><img id="logo-img" alt="prévia do logo"><button type="button" id="logo-remove" class="mini-x" aria-label="Remover imagem">remover</button></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Plataformas -->
+          <fieldset class="bsec">
+            <legend><span class="num">02</span> Plataformas &amp; números</legend>
+            <p class="hint">Adicione cada rede onde você tem presença. Os números entram como você digitar — a IA não inventa métricas.</p>
+            <div id="plats-list" class="rep-list"></div>
+            <button type="button" id="add-plat" class="btn-add">+ Adicionar plataforma</button>
+          </fieldset>
+
+          <!-- Público -->
+          <fieldset class="bsec">
+            <legend><span class="num">03</span> Público</legend>
+            <div class="form-group"><label for="f-pub-idade">Faixa etária predominante</label><input id="f-pub-idade" type="text" placeholder="Ex.: 25–34 anos (62%)"></div>
+            <div class="grid2">
+              <div class="form-group"><label for="f-pub-genero">Gênero</label><input id="f-pub-genero" type="text" placeholder="Ex.: 70% mulheres"></div>
+              <div class="form-group"><label for="f-pub-local">Principais locais</label><input id="f-pub-local" type="text" placeholder="SP, RJ, MG"></div>
+            </div>
+          </fieldset>
+
+          <!-- Sobre -->
+          <fieldset class="bsec">
+            <legend><span class="num">04</span> Sobre você</legend>
+            <div class="form-group"><label for="f-bio">Conte quem você é e o que entrega (a IA refina)</label><textarea id="f-bio" rows="4" placeholder="Crio conteúdo de moda acessível há 4 anos, com foco em looks do dia a dia…"></textarea></div>
+          </fieldset>
+
+          <!-- Entregáveis -->
+          <fieldset class="bsec">
+            <legend><span class="num">05</span> Entregáveis</legend>
+            <p class="hint">Marque o que você produz para marcas.</p>
+            <div id="entregaveis" class="chips" role="group" aria-label="Entregáveis"></div>
+            <div class="form-group"><label for="f-entregaveis-extra">Outros (separe por vírgula)</label><input id="f-entregaveis-extra" type="text" placeholder="Narração, fotografia de produto…"></div>
+          </fieldset>
+
+          <!-- Portfólio -->
+          <fieldset class="bsec">
+            <legend><span class="num">06</span> Portfólio &amp; resultados</legend>
+            <div class="form-group"><label for="f-marcas">Marcas com quem já trabalhou (uma por linha)</label><textarea id="f-marcas" rows="3" placeholder="Natura&#10;Amaro&#10;Boticário"></textarea></div>
+            <div class="form-group"><label for="f-resultados">Destaques / resultados (opcional)</label><textarea id="f-resultados" rows="2" placeholder="Ex.: campanha com 1,2 mi de alcance e 8% de engajamento"></textarea></div>
+          </fieldset>
+
+          <!-- Pacotes -->
+          <fieldset class="bsec">
+            <legend><span class="num">07</span> Pacotes &amp; valores</legend>
+            <p class="hint">Os valores aparecem exatamente como você informar.</p>
+            <div id="pkgs-list" class="rep-list"></div>
+            <button type="button" id="add-pkg" class="btn-add">+ Adicionar pacote</button>
+          </fieldset>
+
+          <!-- Depoimentos -->
+          <fieldset class="bsec">
+            <legend><span class="num">08</span> Depoimentos (opcional)</legend>
+            <div id="deps-list" class="rep-list"></div>
+            <button type="button" id="add-dep" class="btn-add">+ Adicionar depoimento</button>
+          </fieldset>
+
+          <!-- Contato -->
+          <fieldset class="bsec">
+            <legend><span class="num">09</span> Contato</legend>
+            <div class="form-group"><label for="f-email">E-mail para marcas</label><input id="f-email" type="email" placeholder="contato@marina.com"></div>
+            <div class="grid2">
+              <div class="form-group"><label for="f-whats">WhatsApp</label><input id="f-whats" type="text" placeholder="(11) 90000-0000"></div>
+              <div class="form-group"><label for="f-site">Site / link</label><input id="f-site" type="text" placeholder="linktr.ee/marina"></div>
+            </div>
+          </fieldset>
+
+          <!-- Gerar -->
+          <fieldset class="bsec gen-sec">
+            <legend><span class="num">10</span> Gerar</legend>
+            <div class="form-group"><label for="model-select">Modelo de IA</label><select id="model-select" class="select"></select></div>
+            <button type="button" id="btn-generate" class="btn-primary btn-generate">
+              <span class="btn-text">Montar meu mídia kit</span>
+              <span class="btn-loading">Escrevendo o kit…</span>
+            </button>
+            <p id="gen-status" class="gen-status" role="status"></p>
+          </fieldset>
+        </div>
+      </section>
+
+      <!-- STAGE / PREVIEW -->
+      <section class="stage" aria-label="Prévia do mídia kit">
+        <div class="stage-bar">
+          <span class="stage-label">PRÉVIA</span>
+          <div class="stage-actions">
+            <button type="button" id="btn-pdf" class="btn-tool" disabled>Baixar PDF</button>
+            <button type="button" id="btn-html" class="btn-tool" disabled>Baixar HTML</button>
+            <button type="button" id="btn-png" class="btn-tool" disabled>Baixar capa PNG</button>
+            <button type="button" id="btn-copy" class="btn-tool" disabled>Copiar texto</button>
+          </div>
+        </div>
+        <div class="stage-scroll">
+          <div id="kit" class="kit" aria-live="polite">
+            <div class="kit-empty">
+              <div class="kit-empty-cover">
+                <span class="ke-kicker">MÍDIA KIT · 2026</span>
+                <span class="ke-title">SUA<br>CAPA</span>
+                <span class="ke-foot">preencha a pauta e clique em montar</span>
+              </div>
+              <p>Seu mídia kit aparece aqui como uma revista: capa com as suas métricas em destaque, seções de sobre, público, números, portfólio, pacotes e contato — pronto para baixar e mandar para a marca.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Feito com carinho para a comunidade <strong>Maestros da IA</strong></p>
+      <p class="footer-links">
+        <a href="privacy-policy.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>
+        <span class="footer-sep">·</span>
+        <a href="data-deletion.html" target="_blank" rel="noopener noreferrer">Solicitar Exclusão de Dados</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- API Key Modal -->
+  <div id="key-modal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Chave de IA</h3>
+        <button id="modal-close" class="btn-icon" aria-label="Fechar">&times;</button>
+      </div>
+      <div id="modal-key-inputs" class="key-inputs"></div>
+      <div class="form-group">
+        <label for="model-select-modal">Modelo de IA</label>
+        <select id="model-select-modal" class="select"></select>
+      </div>
+      <div class="modal-actions">
+        <button id="modal-save" class="btn-primary">Salvar</button>
+        <button id="modal-clear" class="btn-danger">Limpar a chave</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="kill-switch.js"></script>
+  <script src="rate-limiter.js"></script>
+  <script src="https://gate.maestrosdaia.com/v1/membership-gate.js"></script>
+  <script src="api-key-manager.js"></script>
+  <script src="feedback-widget.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

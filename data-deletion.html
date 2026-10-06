@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitar Exclusão de Dados — Mídia Kit IA</title>
+  <style>
+    :root{--bg:#f4f1ea;--elev:#fbf9f4;--card:#fff;--ink:#16140f;--muted:#5c564a;--dim:#8a8372;--border:#e3dccd;--accent:#d81b60;--gold:#a9864f;--good:#1f8a53;--bad:#b3261e}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased}
+    .container{max-width:520px;margin:0 auto;padding:48px 24px}
+    .back-link{display:inline-block;margin-bottom:22px;font-size:14px;color:var(--accent);text-decoration:none;font-weight:700}
+    .back-link:hover{text-decoration:underline}
+    .kicker{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700}
+    h1{font-size:28px;font-weight:800;margin:6px 0 8px}
+    .subtitle{color:var(--muted);font-size:15px;margin-bottom:28px}
+    .form-card{background:var(--card);border:1px solid var(--border);border-top:5px solid var(--accent);border-radius:12px;padding:28px;box-shadow:0 24px 60px -34px rgba(22,20,15,.4)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    input,textarea{width:100%;padding:12px 14px;background:var(--elev);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+    input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(216,27,96,.15)}
+    textarea{min-height:100px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:var(--dim)}
+    .btn-primary{width:100%;padding:14px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;min-height:50px}
+    .btn-primary:hover{filter:brightness(1.06)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn-loading{display:none}
+    .error-message{color:var(--bad);font-size:14px;margin-top:12px;text-align:center;display:none;font-weight:600}
+    .success-message{color:var(--good);font-size:14px;margin-top:12px;text-align:center;display:none;font-weight:600}
+    .info-box{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:16px;margin-top:22px}
+    .info-box p{color:var(--muted);font-size:13px;margin-bottom:4px}
+  </style>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%2316140f'/%3E%3Crect x='6' y='5' width='20' height='22' rx='2' fill='%23f4f1ea'/%3E%3Crect x='9' y='8' width='14' height='3' rx='1' fill='%23e11d6b'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">&larr; Voltar para a ferramenta</a>
+    <span class="kicker">Maestros da IA · LGPD</span>
+    <h1>Solicitar Exclusão de Dados</h1>
+    <p class="subtitle">Em conformidade com a LGPD, você pode solicitar a exclusão dos seus dados pessoais a qualquer momento.</p>
+
+    <div class="form-card">
+      <form id="deletion-form">
+        <div class="form-group">
+          <label for="del-email">Seu e-mail cadastrado</label>
+          <input type="email" id="del-email" placeholder="seu@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="del-phone">Seu WhatsApp (opcional)</label>
+          <input type="tel" id="del-phone" placeholder="11999999999" autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label for="del-reason">Motivo (opcional)</label>
+          <textarea id="del-reason" placeholder="Conte-nos por que deseja excluir seus dados…"></textarea>
+        </div>
+        <button type="submit" id="del-submit" class="btn-primary">
+          <span class="btn-text">Enviar solicitação</span>
+          <span class="btn-loading">Enviando…</span>
+        </button>
+        <p id="del-error" class="error-message"></p>
+        <p id="del-success" class="success-message"></p>
+      </form>
+    </div>
+
+    <div class="info-box">
+      <p><strong>O que acontece após a solicitação:</strong></p>
+      <p>Sua solicitação será processada em até 15 dias úteis. Você receberá confirmação por e-mail quando seus dados forem excluídos. Dúvidas: contato@lyraarte.com</p>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    document.getElementById('deletion-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = document.getElementById('del-email').value.trim();
+      var phone = document.getElementById('del-phone').value.trim();
+      var reason = document.getElementById('del-reason').value.trim();
+      var submitBtn = document.getElementById('del-submit');
+      var errorEl = document.getElementById('del-error');
+      var successEl = document.getElementById('del-success');
+      var txt = submitBtn.querySelector('.btn-text');
+      var ld = submitBtn.querySelector('.btn-loading');
+
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+      submitBtn.disabled = true;
+      txt.style.display = 'none';
+      ld.style.display = 'inline';
+
+      try {
+        var base = (window.APP_CONFIG && window.APP_CONFIG.n8nWebhookBase) || '';
+        var resp = await fetch(base + '/request-deletion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), phone: phone.replace(/\D/g, ''), reason: reason || null })
+        });
+        var result = {};
+        try { result = await resp.json(); } catch (_) {}
+        if (!result.success) {
+          errorEl.textContent = result.error || 'Erro ao enviar. Tente novamente ou escreva para contato@lyraarte.com.';
+          errorEl.style.display = 'block';
+        } else {
+          successEl.textContent = 'Solicitação enviada! Processaremos em até 15 dias úteis.';
+          successEl.style.display = 'block';
+          document.getElementById('deletion-form').reset();
+        }
+      } catch (_) {
+        errorEl.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        errorEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        txt.style.display = 'inline';
+        ld.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
